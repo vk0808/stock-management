@@ -6,7 +6,7 @@ namespace StockManagement
     {
         static void Main(string[] args)
         {
-            StockAccount stock = new StockAccount();
+            StockAccount stock = new StockAccount(@"..\..\..\Portfolio.json");
 
             Console.WriteLine(stock.welcome());
             stock.performTask();
