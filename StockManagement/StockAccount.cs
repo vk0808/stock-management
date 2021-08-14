@@ -26,7 +26,7 @@ namespace StockManagement
 
 
         // Method to write to json file
-        private void writeJSON(List<Stock> list)
+        private void save(List<Stock> list)
         {
             // JSON-Serializing
             string json = JsonConvert.SerializeObject(list);
@@ -45,6 +45,7 @@ namespace StockManagement
             return list;
         }
 
+
         // Method to read json file
         private List<Stock> readJSON()
         {
@@ -56,7 +57,7 @@ namespace StockManagement
                 list = addShare(list, "tcs", 634, 3360);
                 list = addShare(list, "tata consumer", 1340, 777);
                 list = addShare(list, "reliance industries", 956, 2117.30);
-                writeJSON(list);
+                save(list);
             }
 
             //Deserializing JSON file
@@ -65,9 +66,11 @@ namespace StockManagement
             return dataFile;
         }
 
+
         // Method to display data stored in JSON file
-        public void displayJSON(List<Stock> dataFile)
+        public void printReport()
         {
+            List<Stock> dataFile = readJSON();
             foreach (var item in dataFile)
             {
                 // Display name, weight, price per kg
@@ -80,12 +83,13 @@ namespace StockManagement
             Console.WriteLine($"\nTotal value of the portfolio = Rs. {valueOf()}\n");
         }
 
+
         // method to calculate the total value
         public double valueOf()
         {
             List<Stock> dataFile = readJSON();
             foreach (var item in dataFile)
-            {   
+            {
                 // Calulate the total value
                 this._portfolioTotal += (item._noOfShares * item._sharePrice);
             }
@@ -93,11 +97,67 @@ namespace StockManagement
         }
 
 
+        // method to add shares to stock
+        public void buy(double amount, string name)
+        {
+            bool notFound = true;
+            List<Stock> dataFile = readJSON();
+            foreach (var item in dataFile)
+            {
+                if (item._name == name)
+                {
+                    item._noOfShares += amount;
+                    Console.WriteLine("Buy successful\n");
+                    Console.WriteLine($"{amount} shares of {item._name} purchased.\nTotal shares: {item._noOfShares}\n");
+                    notFound = false;
+                    break;
+                }
+                
+            }
+            if (notFound)
+            {
+                Console.WriteLine("Stock not in your portfolio. Add stock to your portfolio.\nEnter share price: ");
+                double price = double.Parse(Console.ReadLine());
+                Console.WriteLine("Enter no of shares you want to buy:");
+                double num = double.Parse(Console.ReadLine());
+                dataFile = addShare(dataFile, name, num, price);
+            }
+            save(dataFile);
+        }
+
+
+        // method to subtract shares from stock
+        public void sell(double amount, string name)
+        {
+            List<Stock> dataFile = readJSON();
+            foreach (var item in dataFile)
+            {
+                if (item._name == name)
+                {
+                    if (item._noOfShares >= amount)
+                    {
+
+                        item._noOfShares -= amount;
+                        Console.WriteLine("Sell successful\n");
+                        Console.WriteLine($"{amount} shares of {item._name} sold.\nTotal shares: {item._noOfShares}\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Can't sell shares. {amount} is more than {item._noOfShares}\n");
+                    }
+                }
+            }
+            save(dataFile);
+        }
+
         // method to perform tasks
         public void performTask()
         {
-            List<Stock> dataFile = readJSON();
-            displayJSON(dataFile);
+            printReport();
+            Console.WriteLine("Enter no. of shares you want to buy");
+            double amt = double.Parse(Console.ReadLine());
+            sell(amt, "tata consumer");
+            printReport();
         }
     }
 }
