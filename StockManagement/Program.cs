@@ -7,7 +7,9 @@ namespace StockManagement
         static void Main(string[] args)
         {
             StockAccount stock = new StockAccount();
+
             Console.WriteLine(stock.welcome());
+            stock.performTask();
         }
     }
 }
