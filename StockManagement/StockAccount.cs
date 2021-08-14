@@ -10,18 +10,50 @@ namespace StockManagement
 {
     public class StockAccount
     {
+        // instance variables
         public double _portfolioTotal = 0;
         public string _path;
 
+        // constructor
         public StockAccount(string path)
         {
             this._path = path;
         }
 
+
         // Method to return welcome message
         public string welcome()
         {
             return "Welcome to Stock Account Management Program\n";
+        }
+
+
+        // Method to display menu and get task 
+        public void menu()
+        {
+            int task = 6;
+            while (task != 1 && task != 2 && task != 3 && task != 4 && task != 5)
+            {
+                Console.WriteLine("\n==============================================\n");
+                Console.WriteLine("Enter the task you want to perform\n1. Buy\n2. Sell\n3. View Portfolio\n4. Show total value\n5. Exit\n");
+                task = int.Parse(Console.ReadLine());
+
+                if (task == 5) // exit
+                {
+                    Console.WriteLine("\nExiting...");
+                    break;
+                }
+
+                if (task != 1 && task != 2 && task != 3 && task != 4) // when wrong number
+                {
+                    Console.WriteLine("You have enterd wrong task number\n");
+                }
+                else // performing task
+                {
+                    performTask(task);
+                    task = 6; // to keep inside loop
+                }
+            }
         }
 
 
@@ -70,6 +102,7 @@ namespace StockManagement
         // Method to display data stored in JSON file
         public void printReport()
         {
+            Console.WriteLine("\nPortfolio details: \n");
             List<Stock> dataFile = readJSON();
             foreach (var item in dataFile)
             {
@@ -79,14 +112,14 @@ namespace StockManagement
                 Console.WriteLine($"{item._name}'s total value : Rs. {(item._noOfShares * item._sharePrice)}\n");
                 Console.WriteLine("--------------------------------------------\n");
             }
-
-            Console.WriteLine($"\nTotal value of the portfolio = Rs. {valueOf()}\n");
+            Console.WriteLine($"\nTotal value : Rs. {valueOf()}\n");
         }
 
 
         // method to calculate the total value
         public double valueOf()
         {
+            this._portfolioTotal = 0;
             List<Stock> dataFile = readJSON();
             foreach (var item in dataFile)
             {
@@ -107,20 +140,22 @@ namespace StockManagement
                 if (item._name == name)
                 {
                     item._noOfShares += amount;
-                    Console.WriteLine("Buy successful\n");
+                    Console.WriteLine("\n***Buy successful***\n");
                     Console.WriteLine($"{amount} shares of {item._name} purchased.\nTotal shares: {item._noOfShares}\n");
                     notFound = false;
                     break;
                 }
-                
+
             }
             if (notFound)
             {
-                Console.WriteLine("Stock not in your portfolio. Add stock to your portfolio.\nEnter share price: ");
-                double price = double.Parse(Console.ReadLine());
-                Console.WriteLine("Enter no of shares you want to buy:");
+                Console.WriteLine("Stock not in your portfolio. Add stock to your portfolio.\nEnter no of shares you want to buy: ");
                 double num = double.Parse(Console.ReadLine());
+                Console.WriteLine("Enter share price: ");
+                double price = double.Parse(Console.ReadLine());
                 dataFile = addShare(dataFile, name, num, price);
+                Console.WriteLine("\n***Buy successful***\n");
+
             }
             save(dataFile);
         }
@@ -138,7 +173,7 @@ namespace StockManagement
                     {
 
                         item._noOfShares -= amount;
-                        Console.WriteLine("Sell successful\n");
+                        Console.WriteLine("\n***Sell successful***\n");
                         Console.WriteLine($"{amount} shares of {item._name} sold.\nTotal shares: {item._noOfShares}\n");
                     }
                     else
@@ -150,14 +185,49 @@ namespace StockManagement
             save(dataFile);
         }
 
-        // method to perform tasks
-        public void performTask()
+
+        // method to get stock name and amount
+        public string[] getCompany()
         {
-            printReport();
-            Console.WriteLine("Enter no. of shares you want to buy");
-            double amt = double.Parse(Console.ReadLine());
-            sell(amt, "tata consumer");
-            printReport();
+            Console.WriteLine("\nEnter the Stock name: ");
+            string name = Console.ReadLine();
+            Console.WriteLine("\nEnter the no. of units: ");
+            string amount = Console.ReadLine();
+            string[] array = { name, amount };
+            return array;
+        }
+
+
+        // method to perform tasks
+        public void performTask(int choice)
+        {
+            switch (choice)
+            {
+                case 1:
+                    string[] detailsBuy = getCompany();
+                    string nameBuy = detailsBuy[0];
+                    double amountBuy = double.Parse(detailsBuy[1]);
+                    buy(amountBuy, nameBuy);
+                    break;
+
+                case 2:
+                    string[] detailsSell = getCompany();
+                    string nameSell = detailsSell[0];
+                    double amountSell = double.Parse(detailsSell[1]);
+                    sell(amountSell, nameSell);
+                    break;
+
+                case 3:
+                    printReport();
+                    break;
+
+                case 4:
+                    Console.WriteLine($"\nTotal value : Rs. {valueOf()}"); ;
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 }

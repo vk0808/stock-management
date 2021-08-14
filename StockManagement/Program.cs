@@ -9,7 +9,7 @@ namespace StockManagement
             StockAccount stock = new StockAccount(@"..\..\..\Portfolio.json");
 
             Console.WriteLine(stock.welcome());
-            stock.performTask();
+            stock.menu();
         }
     }
 }
