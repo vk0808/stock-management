@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "0DJ/FVbS/RuNSR/uA+4+aY32PzozZspQYYeCnx2M4DQHnpMp3u6efLm51ZKGIyMivu3LVh+nhU8jxOio6JwS1Q==",
+  "dgSpecHash": "42muMT+JonTunl4BtwQswODCeQLob7W5R8Ccjy7x87Af0FiCNbyDR4nfW8bhH3UaGhe+g8cVQNdXQsg1henpYw==",
   "success": true,
   "projectFilePath": "C:\\Users\\vk476\\Desktop\\Fellowship Program\\Practice Problems\\Day11-12Problems\\StockManagement\\StockManagement\\StockManagement.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\vk476\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }
