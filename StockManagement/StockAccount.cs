@@ -104,13 +104,15 @@ namespace StockManagement
         {
             Console.WriteLine("\nPortfolio details: \n");
             List<Stock> dataFile = readJSON();
+            Console.WriteLine($"{"Stock Name", 25}\t{"Units", 10}\t{"Price(Rs.)",10}\tValue(Rs.)");
+
             foreach (var item in dataFile)
             {
                 // Display name, weight, price per kg
-                Console.WriteLine($"Stock Name : {item._name}\nNo. of Shares : {item._noOfShares} units\nShare Price: Rs. {item._sharePrice}");
+                Console.WriteLine($"{item._name, 25} |\t{item._noOfShares, 10} |\t{item._sharePrice, 10} |\t{(item._noOfShares * item._sharePrice)}");
 
-                Console.WriteLine($"{item._name}'s total value : Rs. {(item._noOfShares * item._sharePrice)}\n");
-                Console.WriteLine("--------------------------------------------\n");
+                //Console.WriteLine($"{item._name}'s total value : Rs. {(item._noOfShares * item._sharePrice)}\n");
+                //Console.WriteLine("--------------------------------------------\n");
             }
             Console.WriteLine($"\nTotal value : Rs. {valueOf()}\n");
         }
