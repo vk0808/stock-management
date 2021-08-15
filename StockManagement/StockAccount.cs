@@ -64,7 +64,7 @@ namespace StockManagement
             string json = JsonConvert.SerializeObject(list);
             File.WriteAllText(this._path, json);
 
-            Console.WriteLine("\nStock details has been added successFully to JSON File.\n");
+            Console.WriteLine("\nStock details has been saved successFully to JSON File.\n");
         }
 
 
@@ -84,12 +84,9 @@ namespace StockManagement
             // Check if file exists, if not then create file
             if (File.Exists(this._path) == false)
             {
-                Console.WriteLine("\nThere is no file. New json file created\n");
+                Console.WriteLine("\nThere is no file. Create a new file by adding stocks.\n");
                 List<Stock> list = new List<Stock>();
-                list = addShare(list, "tcs", 634, 3360);
-                list = addShare(list, "tata consumer", 1340, 777);
-                list = addShare(list, "reliance industries", 956, 2117.30);
-                save(list);
+                return list;
             }
 
             //Deserializing JSON file
@@ -99,22 +96,84 @@ namespace StockManagement
         }
 
 
-        // Method to display data stored in JSON file
-        public void printReport()
+        // method to add shares to stock
+        public void buy(double amount, string name, double price)
         {
-            Console.WriteLine("\nPortfolio details: \n");
+            bool notFound = true;
             List<Stock> dataFile = readJSON();
-            Console.WriteLine($"{"Stock Name", 25}\t{"Units", 10}\t{"Price(Rs.)",10}\tValue(Rs.)");
-
+            double units = roundDouble(amount / price, 4);
             foreach (var item in dataFile)
             {
-                // Display name, weight, price per kg
-                Console.WriteLine($"{item._name, 25} |\t{item._noOfShares, 10} |\t{item._sharePrice, 10} |\t{(item._noOfShares * item._sharePrice)}");
+                double totalAmount = 0;
+                if (item._name == name)
+                {
+                    totalAmount = item._sharePrice * item._noOfShares + amount;
+                    item._noOfShares += units;
+                    item._sharePrice = totalAmount / item._noOfShares;
+                    Console.WriteLine("\n***Buy successful***\n");
+                    Console.WriteLine($"{units} shares of {item._name} purchased.\nTotal shares: {roundDouble(item._noOfShares, 4)}\n");
+                    notFound = false;
+                    break;
+                }
 
-                //Console.WriteLine($"{item._name}'s total value : Rs. {(item._noOfShares * item._sharePrice)}\n");
-                //Console.WriteLine("--------------------------------------------\n");
             }
-            Console.WriteLine($"\nTotal value : Rs. {valueOf()}\n");
+            if (notFound)
+            {
+                Console.WriteLine("Stock not in your portfolio. Stock will be added to your portfolio.\n");
+                dataFile = addShare(dataFile, name, units, price);
+                Console.WriteLine("\n***Buy successful***\n");
+
+            }
+            save(dataFile);
+        }
+
+
+        // method to subtract shares from stock
+        public void sell(double amount, string name, double price)
+        {
+            List<Stock> dataFile = readJSON();
+            foreach (var item in dataFile)
+            {
+                if (item._name == name)
+                {
+                    double units = roundDouble(amount / price, 4);
+                    if (item._noOfShares >= units)
+                    {
+                        item._noOfShares -= roundDouble(amount / price, 4);
+                        Console.WriteLine("\n***Sell successful***\n");
+                        Console.WriteLine($"{units} shares of {item._name} sold.\nTotal shares: {roundDouble(item._noOfShares, 4)}\n");
+                        save(dataFile);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Can't sell shares. {units} is more than {roundDouble(item._noOfShares, 4)}\n");
+                    }
+                }
+            }
+        }
+
+
+        // method to get stock name and amount
+        public string[] getCompany(string type)
+        {
+            Console.WriteLine("\nEnter the Stock name: ");
+            string name = Console.ReadLine();
+
+            Console.WriteLine($"\nEnter the amount you want to {type}: ");
+            string amount = Console.ReadLine();
+
+            Console.WriteLine("\nEnter share price: ");
+            string price = Console.ReadLine();
+
+            string[] array = { name, amount, price };
+            return array;
+        }
+
+
+        // method to round off decimal number
+        public double roundDouble(double num, int point)
+        {
+            return Math.Round(num, point, MidpointRounding.AwayFromZero);
         }
 
 
@@ -128,75 +187,23 @@ namespace StockManagement
                 // Calulate the total value
                 this._portfolioTotal += (item._noOfShares * item._sharePrice);
             }
-            return this._portfolioTotal;
+            return roundDouble(this._portfolioTotal, 2);
         }
 
 
-        // method to add shares to stock
-        public void buy(double amount, string name)
+        // Method to display data stored in JSON file
+        public void printReport()
         {
-            bool notFound = true;
+            Console.WriteLine("\nPortfolio details: \n");
             List<Stock> dataFile = readJSON();
+            Console.WriteLine($"{"Stock Name",25}\t{"Units",10}\t{"Price(Rs.)",10}\tValue(Rs.)");
+
             foreach (var item in dataFile)
             {
-                if (item._name == name)
-                {
-                    item._noOfShares += amount;
-                    Console.WriteLine("\n***Buy successful***\n");
-                    Console.WriteLine($"{amount} shares of {item._name} purchased.\nTotal shares: {item._noOfShares}\n");
-                    notFound = false;
-                    break;
-                }
-
+                // Display name, weight, price per kg
+                Console.WriteLine($"{item._name,25} |\t{roundDouble(item._noOfShares, 4),10} |\t{roundDouble(item._sharePrice, 4),10} |\t{roundDouble(item._noOfShares * item._sharePrice, 2)}");
             }
-            if (notFound)
-            {
-                Console.WriteLine("Stock not in your portfolio. Add stock to your portfolio.\nEnter no of shares you want to buy: ");
-                double num = double.Parse(Console.ReadLine());
-                Console.WriteLine("Enter share price: ");
-                double price = double.Parse(Console.ReadLine());
-                dataFile = addShare(dataFile, name, num, price);
-                Console.WriteLine("\n***Buy successful***\n");
-
-            }
-            save(dataFile);
-        }
-
-
-        // method to subtract shares from stock
-        public void sell(double amount, string name)
-        {
-            List<Stock> dataFile = readJSON();
-            foreach (var item in dataFile)
-            {
-                if (item._name == name)
-                {
-                    if (item._noOfShares >= amount)
-                    {
-
-                        item._noOfShares -= amount;
-                        Console.WriteLine("\n***Sell successful***\n");
-                        Console.WriteLine($"{amount} shares of {item._name} sold.\nTotal shares: {item._noOfShares}\n");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Can't sell shares. {amount} is more than {item._noOfShares}\n");
-                    }
-                }
-            }
-            save(dataFile);
-        }
-
-
-        // method to get stock name and amount
-        public string[] getCompany()
-        {
-            Console.WriteLine("\nEnter the Stock name: ");
-            string name = Console.ReadLine();
-            Console.WriteLine("\nEnter the no. of units: ");
-            string amount = Console.ReadLine();
-            string[] array = { name, amount };
-            return array;
+            Console.WriteLine($"\nTotal value : Rs. {valueOf()}\n");
         }
 
 
@@ -206,17 +213,19 @@ namespace StockManagement
             switch (choice)
             {
                 case 1:
-                    string[] detailsBuy = getCompany();
+                    string[] detailsBuy = getCompany("invest");
                     string nameBuy = detailsBuy[0];
                     double amountBuy = double.Parse(detailsBuy[1]);
-                    buy(amountBuy, nameBuy);
+                    double priceBuy = double.Parse(detailsBuy[2]);
+                    buy(amountBuy, nameBuy, priceBuy);
                     break;
 
                 case 2:
-                    string[] detailsSell = getCompany();
+                    string[] detailsSell = getCompany("sell");
                     string nameSell = detailsSell[0];
                     double amountSell = double.Parse(detailsSell[1]);
-                    sell(amountSell, nameSell);
+                    double priceSell = double.Parse(detailsSell[2]);
+                    sell(amountSell, nameSell, priceSell);
                     break;
 
                 case 3:
