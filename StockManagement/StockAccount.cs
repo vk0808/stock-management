@@ -69,10 +69,10 @@ namespace StockManagement
 
 
         // Method to add share
-        public List<Stock> addShare(List<Stock> list, string name, double no, double price)
+        public List<Stock> addShare(List<Stock> list, string name, string symbol, double no, double price)
         {
 
-            Stock stock = new Stock(name, no, price);
+            Stock stock = new Stock(name, symbol, no, price);
             list.Add(stock);
             return list;
         }
@@ -97,7 +97,7 @@ namespace StockManagement
 
 
         // method to add shares to stock
-        public void buy(double amount, string name, double price)
+        public void buy(double amount, string symbol, double price)
         {
             bool notFound = true;
             List<Stock> dataFile = readJSON();
@@ -105,7 +105,7 @@ namespace StockManagement
             foreach (var item in dataFile)
             {
                 double totalAmount = 0;
-                if (item._name == name)
+                if (item._symbol == symbol)
                 {
                     totalAmount = item._sharePrice * item._noOfShares + amount;
                     item._noOfShares += units;
@@ -120,7 +120,9 @@ namespace StockManagement
             if (notFound)
             {
                 Console.WriteLine("Stock not in your portfolio. Stock will be added to your portfolio.\n");
-                dataFile = addShare(dataFile, name, units, price);
+                Console.Write("\nEnter stock name: ");
+                string name = Console.ReadLine().ToLower();
+                dataFile = addShare(dataFile, name, symbol, units, price);
                 Console.WriteLine("\n***Buy successful***\n");
 
             }
@@ -129,12 +131,12 @@ namespace StockManagement
 
 
         // method to subtract shares from stock
-        public void sell(double amount, string name, double price)
+        public void sell(double amount, string symbol, double price)
         {
             List<Stock> dataFile = readJSON();
             foreach (var item in dataFile)
             {
-                if (item._name == name)
+                if (item._symbol == symbol)
                 {
                     double units = roundDouble(amount / price, 4);
                     if (item._noOfShares >= units)
@@ -156,16 +158,16 @@ namespace StockManagement
         // method to get stock name and amount
         public string[] getCompany(string type)
         {
-            Console.WriteLine("\nEnter the Stock name: ");
-            string name = Console.ReadLine();
+            Console.Write("\nEnter the Stock symbol: ");
+            string symbol = Console.ReadLine().ToLower();
 
-            Console.WriteLine($"\nEnter the amount you want to {type}: ");
+            Console.Write($"\nEnter the amount you want to {type}: ");
             string amount = Console.ReadLine();
 
-            Console.WriteLine("\nEnter share price: ");
+            Console.Write("\nEnter share price: ");
             string price = Console.ReadLine();
 
-            string[] array = { name, amount, price };
+            string[] array = { symbol, amount, price };
             return array;
         }
 
@@ -196,12 +198,12 @@ namespace StockManagement
         {
             Console.WriteLine("\nPortfolio details: \n");
             List<Stock> dataFile = readJSON();
-            Console.WriteLine($"{"Stock Name",25}\t{"Units",10}\t{"Price(Rs.)",10}\tValue(Rs.)");
+            Console.WriteLine($"{"Stock Name",25}\t{"Symbol",10}\t{"Units",10}\t{"Price(Rs.)",10}\tValue(Rs.)");
 
             foreach (var item in dataFile)
             {
                 // Display name, weight, price per kg
-                Console.WriteLine($"{item._name,25} |\t{roundDouble(item._noOfShares, 4),10} |\t{roundDouble(item._sharePrice, 4),10} |\t{roundDouble(item._noOfShares * item._sharePrice, 2)}");
+                Console.WriteLine($"{item._name,25} |\t{item._symbol.ToUpper(),10} |\t{roundDouble(item._noOfShares, 4),10} |\t{roundDouble(item._sharePrice, 4),10} |\t{roundDouble(item._noOfShares * item._sharePrice, 2)}");
             }
             Console.WriteLine($"\nTotal value : Rs. {valueOf()}\n");
         }
@@ -214,18 +216,18 @@ namespace StockManagement
             {
                 case 1:
                     string[] detailsBuy = getCompany("invest");
-                    string nameBuy = detailsBuy[0];
+                    string symbolBuy = detailsBuy[0];
                     double amountBuy = double.Parse(detailsBuy[1]);
                     double priceBuy = double.Parse(detailsBuy[2]);
-                    buy(amountBuy, nameBuy, priceBuy);
+                    buy(amountBuy, symbolBuy, priceBuy);
                     break;
 
                 case 2:
                     string[] detailsSell = getCompany("sell");
-                    string nameSell = detailsSell[0];
+                    string symbolSell = detailsSell[0];
                     double amountSell = double.Parse(detailsSell[1]);
                     double priceSell = double.Parse(detailsSell[2]);
-                    sell(amountSell, nameSell, priceSell);
+                    sell(amountSell, symbolSell, priceSell);
                     break;
 
                 case 3:
