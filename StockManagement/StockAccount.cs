@@ -13,6 +13,7 @@ namespace StockManagement
         // instance variables
         public double _portfolioTotal = 0;
         public string _path;
+        public LinkedList linkedList = new LinkedList();
 
         // constructor
         public StockAccount(string path)
@@ -35,7 +36,7 @@ namespace StockManagement
             while (task != 1 && task != 2 && task != 3 && task != 4 && task != 5)
             {
                 Console.WriteLine("\n==============================================\n");
-                Console.WriteLine("Enter the task you want to perform\n1. Buy\n2. Sell\n3. View Portfolio\n4. Show total value\n5. Exit\n");
+                Console.WriteLine("Enter the task you want to perform\n1. Buy\n2. Sell\n3. View Portfolio/Transactions\n4. Show total value\n5. Exit\n");
                 task = int.Parse(Console.ReadLine());
 
                 if (task == 5) // exit
@@ -99,9 +100,11 @@ namespace StockManagement
         // method to add shares to stock
         public void buy(double amount, string symbol, double price)
         {
-            bool notFound = true;
             List<Stock> dataFile = readJSON();
+            
+            bool notFound = true;
             double units = roundDouble(amount / price, 4);
+            
             foreach (var item in dataFile)
             {
                 double totalAmount = 0;
@@ -110,9 +113,15 @@ namespace StockManagement
                     totalAmount = item._sharePrice * item._noOfShares + amount;
                     item._noOfShares += units;
                     item._sharePrice = totalAmount / item._noOfShares;
+
                     Console.WriteLine("\n***Buy successful***\n");
                     Console.WriteLine($"{units} shares of {item._name} purchased.\nTotal shares: {roundDouble(item._noOfShares, 4)}\n");
+                    
                     notFound = false;
+                    
+                    string dt = DateTime.UtcNow.ToString();
+                    linkedList.AddLast(symbol, units, price, "buy", dt);
+
                     break;
                 }
 
@@ -122,8 +131,13 @@ namespace StockManagement
                 Console.WriteLine("Stock not in your portfolio. Stock will be added to your portfolio.\n");
                 Console.Write("\nEnter stock name: ");
                 string name = Console.ReadLine().ToLower();
+            
                 dataFile = addShare(dataFile, name, symbol, units, price);
+                
                 Console.WriteLine("\n***Buy successful***\n");
+                
+                string dt = DateTime.UtcNow.ToString();
+                linkedList.AddLast(symbol, units, price, "buy", dt);
 
             }
             save(dataFile);
@@ -134,6 +148,7 @@ namespace StockManagement
         public void sell(double amount, string symbol, double price)
         {
             List<Stock> dataFile = readJSON();
+            
             foreach (var item in dataFile)
             {
                 if (item._symbol == symbol)
@@ -142,9 +157,15 @@ namespace StockManagement
                     if (item._noOfShares >= units)
                     {
                         item._noOfShares -= roundDouble(amount / price, 4);
+            
                         Console.WriteLine("\n***Sell successful***\n");
                         Console.WriteLine($"{units} shares of {item._name} sold.\nTotal shares: {roundDouble(item._noOfShares, 4)}\n");
+                        
                         save(dataFile);
+                        
+                        string dt = DateTime.UtcNow.ToString();
+                        linkedList.AddLast(symbol, units, price, "sell", dt);
+                        
                     }
                     else
                     {
@@ -173,7 +194,7 @@ namespace StockManagement
 
 
         // method to round off decimal number
-        public double roundDouble(double num, int point)
+        public static double roundDouble(double num, int point)
         {
             return Math.Round(num, point, MidpointRounding.AwayFromZero);
         }
@@ -184,6 +205,7 @@ namespace StockManagement
         {
             this._portfolioTotal = 0;
             List<Stock> dataFile = readJSON();
+            
             foreach (var item in dataFile)
             {
                 // Calulate the total value
@@ -219,6 +241,7 @@ namespace StockManagement
                     string symbolBuy = detailsBuy[0];
                     double amountBuy = double.Parse(detailsBuy[1]);
                     double priceBuy = double.Parse(detailsBuy[2]);
+            
                     buy(amountBuy, symbolBuy, priceBuy);
                     break;
 
@@ -227,11 +250,27 @@ namespace StockManagement
                     string symbolSell = detailsSell[0];
                     double amountSell = double.Parse(detailsSell[1]);
                     double priceSell = double.Parse(detailsSell[2]);
+                    
                     sell(amountSell, symbolSell, priceSell);
                     break;
 
                 case 3:
-                    printReport();
+                    Console.WriteLine("1. View Portfolio\n2. View Transactions\n");
+                    int ch = int.Parse(Console.ReadLine());
+                    
+                    switch (ch)
+                    {
+                        case 1: 
+                            printReport();
+                            break;
+                        case 2:
+                            Console.WriteLine("\nTransaction details: \n");
+                            linkedList.Display();
+                            break;
+                        default:
+                            Console.WriteLine("Wrong input\n");
+                            break;
+                    }                   
                     break;
 
                 case 4:
